@@ -1,28 +1,11 @@
-"""
-╔══════════════════════════════════════════════════════════════╗
-║  AIRCRAFT FDM — CONDITIONS 1, 2, 3 & 4                      ║
-║  • Condition 1: Engine Temp  ≥ 850°C  → WARNING             ║
-║                              ≥ 950°C  → CRITICAL            ║
-║  • Condition 2: Fuel Level   ≤ 30%   → WARNING              ║
-║                              ≤ 20%   → CRITICAL             ║
-║  • Condition 3: Roll Angle   > ±40°  → ALERT                ║
-║                              > ±45°  → INSTABILITY          ║
-║  • Condition 4: Altitude Drop> 500ft → WARNING              ║
-║                              >1000ft → EMERGENCY            ║
-║                                                              ║
-║  Run:  streamlit run fdm_conditions_1_2_3_4.py               ║
-║  Pip:  pip install streamlit pandas plotly numpy             ║
-╚══════════════════════════════════════════════════════════════╝
-"""
-
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-# ─────────────────────────────────────────────────────────────
+
 #  PAGE CONFIG
-# ─────────────────────────────────────────────────────────────
+
 st.set_page_config(
     page_title="Aircraft FDM — All 4 Conditions",
     page_icon="✈",
@@ -138,9 +121,9 @@ alt = np.clip(np.round(alt).astype(int), 0, 42000)
 alt_drops = np.array([0] + [int(alt[i-1] - alt[i]) for i in range(1, DURATION)])
 
 
-# ─────────────────────────────────────────────────────────────
+
 #  SIDEBAR — THRESHOLD SLIDERS
-# ─────────────────────────────────────────────────────────────
+
 with st.sidebar:
     st.markdown("## ✈ Aircraft FDM")
     st.markdown("**Conditions 1, 2, 3 & 4**")
@@ -172,9 +155,9 @@ with st.sidebar:
     st.markdown("📡 **Sampling:** 1 / minute")
 
 
-# ─────────────────────────────────────────────────────────────
+
 #  STATUS HELPERS
-# ─────────────────────────────────────────────────────────────
+
 def eng_status(t):
     if   t >= eng_crit: return "CRITICAL"
     elif t >= eng_warn: return "WARNING"
@@ -205,10 +188,8 @@ SEV_BG = {
     "SAFE":        "background-color:#001a0a;color:#39ff14",
 }
 
+#   DATAFRAMES
 
-# ─────────────────────────────────────────────────────────────
-#  BUILD DATAFRAMES
-# ─────────────────────────────────────────────────────────────
 df = pd.DataFrame({
     "Time":           LABELS,
     "Phase":          PHASES,
@@ -260,9 +241,9 @@ alt_alerts["Message"] = alt_alerts.apply(lambda r:
     axis=1)
 
 
-# ─────────────────────────────────────────────────────────────
-#  HELPER: line chart for engine temp & fuel (existing)
-# ─────────────────────────────────────────────────────────────
+
+#  HELPER: line chart for engine temp & fuel 
+
 def make_line_chart(
     y_data, y_label, y_range,
     line_color, fill_color,
@@ -377,9 +358,9 @@ def make_line_chart(
     return fig
 
 
-# ─────────────────────────────────────────────────────────────
+
 #  HELPER: roll angle line chart (symmetric ± axis)
-# ─────────────────────────────────────────────────────────────
+
 def make_roll_chart(height=380):
     fig = go.Figure()
 
@@ -506,9 +487,9 @@ def make_roll_chart(height=380):
     return fig
 
 
-# ─────────────────────────────────────────────────────────────
+
 #  HELPER: altitude profile line chart  ← NEW
-# ─────────────────────────────────────────────────────────────
+
 def make_altitude_chart(height=380):
     fig = go.Figure()
 
@@ -607,9 +588,9 @@ def make_altitude_chart(height=380):
     return fig
 
 
-# ─────────────────────────────────────────────────────────────
-#  HELPER: drop rate line chart  ← NEW
-# ─────────────────────────────────────────────────────────────
+
+#  HELPER: drop rate line chart  
+
 def make_drop_rate_chart(height=300):
     fig = go.Figure()
 
@@ -687,9 +668,9 @@ def make_drop_rate_chart(height=300):
         gridcolor="#0d2035",
         tickfont=dict(size=10),
         tickangle=-30,
-        type="category",                 # <<< FORCE CATEGORY
+        type="category",                
         categoryorder="array",
-        categoryarray=LABELS             # <<< FORCE ORDER T+00 → T+29
+        categoryarray=LABELS             
     ),
 
     yaxis=dict(
@@ -707,9 +688,9 @@ def make_drop_rate_chart(height=300):
     return fig
 
 
-# ═════════════════════════════════════════════════════════════
+
 #  PAGE HEADER
-# ═════════════════════════════════════════════════════════════
+
 eng_crit_cnt    = sum(1 for t in eng       if eng_status(t)      == "CRITICAL")
 eng_warn_cnt    = sum(1 for t in eng       if eng_status(t)      == "WARNING")
 fuel_crit_cnt   = sum(1 for f in fuel      if fuel_status(f)     == "CRITICAL")
@@ -762,9 +743,8 @@ k12.metric("Alt Emergencies", alt_emerg_cnt,
 st.divider()
 
 
-# ═════════════════════════════════════════════════════════════
 #  SECTION 1 — ENGINE TEMPERATURE
-# ═════════════════════════════════════════════════════════════
+
 st.markdown(
     '<div class="section-banner" style="border-color:#ff6b35;background:#ff6b3510;color:#ff6b35">'
     '🌡 SECTION 1 &nbsp;—&nbsp; CONDITION 1: ENGINE TEMPERATURE MONITOR'
@@ -818,9 +798,9 @@ else:
 st.divider()
 
 
-# ═════════════════════════════════════════════════════════════
+
 #  SECTION 2 — FUEL LEVEL
-# ═════════════════════════════════════════════════════════════
+
 st.markdown(
     '<div class="section-banner" style="border-color:#39ff14;background:#39ff1410;color:#39ff14">'
     '⛽ SECTION 2 &nbsp;—&nbsp; CONDITION 2: FUEL LEVEL MONITOR'
@@ -875,9 +855,8 @@ else:
 st.divider()
 
 
-# ═════════════════════════════════════════════════════════════
 #  SECTION 3 — ROLL ANGLE
-# ═════════════════════════════════════════════════════════════
+
 st.markdown(
     '<div class="section-banner" style="border-color:#ff3fa4;background:#ff3fa410;color:#ff3fa4">'
     '🔄 SECTION 3 &nbsp;—&nbsp; CONDITION 3: ROLL ANGLE & INSTABILITY MONITOR'
@@ -932,9 +911,9 @@ else:
 st.divider()
 
 
-# ═════════════════════════════════════════════════════════════
-#  SECTION 4 — ALTITUDE DROP  ← NEW
-# ═════════════════════════════════════════════════════════════
+
+#  SECTION 4 — ALTITUDE DROP  
+
 st.markdown(
     '<div class="section-banner" style="border-color:#00d4ff;background:#00d4ff10;color:#00d4ff">'
     '📉 SECTION 4 &nbsp;—&nbsp; CONDITION 4: ALTITUDE DROP EMERGENCY MONITOR'
@@ -1000,4 +979,384 @@ else:
     )
 
 st.divider()
-st.caption("✈ Aircraft FDM System | Conditions 1, 2, 3 & 4 | Simulation Mode | FLT-BU01")
+st.caption("✈ Aircraft FDM System | Conditions 1, 2, 3 & 4 | analysis | FLT-BU01")
+
+
+
+
+#FUEL INNOVATION -----------------------------------------------
+
+st.markdown(
+    '<div class="section-banner" style="border-color:#a78bfa;background:#a78bfa10;color:#a78bfa">'
+    '🔮 SECTION 5 &nbsp;—&nbsp; INNOVATION: PREDICTIVE FUEL ESTIMATION ENGINE'
+    '</div>', unsafe_allow_html=True
+)
+
+st.info(
+    "**AI Prediction** &nbsp;|&nbsp; Uses current burn rate trend to forecast fuel level "
+    "for remaining flight &nbsp;|&nbsp; Flags if projected fuel drops below safe threshold before landing",
+    icon="🤖"
+)
+
+# Inline controls for prediction
+pred_col1, pred_col2, pred_col3 = st.columns(3)
+with pred_col1:
+    lookback = st.slider("📊 Burn rate lookback window (samples)", 2, 10, 5,
+                         help="How many past samples to use for burn rate estimate")
+with pred_col2:
+    fuel_reserve = st.slider("🛬 Min. reserve fuel at landing (%)", 5, 25, 10,
+                              help="Minimum fuel % required at T+29m for safe landing")
+with pred_col3:
+    pred_confidence = st.select_slider("📐 Prediction band width",
+                                        options=["Tight (±0.5%)", "Normal (±1%)", "Wide (±2%)"],
+                                        value="Normal (±1%)")
+
+band_map = {"Tight (±0.5%)": 0.5, "Normal (±1%)": 1.0, "Wide (±2%)": 2.0}
+band_width = band_map[pred_confidence]
+
+# ── Calculate burn rate from last `lookback` known samples ───
+# Use full 30-pt fuel array (as if analysing post-flight or at T+29)
+# In a real sim you'd only use fuel[:current_step]
+burn_rates = np.array([fuel[i-1] - fuel[i] for i in range(1, DURATION)])  # per-minute burn
+recent_burn = burn_rates[-lookback:]                    # last N samples
+avg_burn    = float(np.mean(recent_burn))               # average burn rate
+std_burn    = float(np.std(recent_burn))                # variability
+
+# ── Project forward from last known point ────────────────────
+# We "predict" from T+20m onward (mid-cruise) to show the feature meaningfully
+PREDICT_FROM = 20          # minute index we start predicting from
+remaining    = DURATION - PREDICT_FROM   # 10 future minutes
+
+pred_times  = list(range(PREDICT_FROM, DURATION))
+pred_labels = [f"T+{t:02d}m" for t in pred_times]
+
+# Central prediction
+pred_fuel_central = [fuel[PREDICT_FROM]]
+for _ in range(1, remaining):
+    pred_fuel_central.append(max(0, pred_fuel_central[-1] - avg_burn))
+
+# Optimistic band (lower burn rate)
+pred_fuel_upper = [fuel[PREDICT_FROM]]
+for _ in range(1, remaining):
+    pred_fuel_upper.append(max(0, pred_fuel_upper[-1] - max(0, avg_burn - band_width)))
+
+# Pessimistic band (higher burn rate)
+pred_fuel_lower = [fuel[PREDICT_FROM]]
+for _ in range(1, remaining):
+    pred_fuel_lower.append(max(0, pred_fuel_lower[-1] - (avg_burn + band_width)))
+
+# ── Estimated Time to WARNING / CRITICAL ─────────────────────
+def estimate_tte(start_fuel, burn, threshold, is_lower):
+    """Minutes from PREDICT_FROM until fuel crosses threshold."""
+    f = start_fuel
+    for minute in range(remaining):
+        if is_lower and f <= threshold:
+            return PREDICT_FROM + minute
+        f = max(0, f - burn)
+    return None  # won't cross in remaining flight
+
+tte_warn  = estimate_tte(fuel[PREDICT_FROM], avg_burn, fuel_warn,  True)
+tte_crit  = estimate_tte(fuel[PREDICT_FROM], avg_burn, fuel_crit,  True)
+tte_resrv = estimate_tte(fuel[PREDICT_FROM], avg_burn, fuel_reserve, True)
+
+landing_fuel_central  = pred_fuel_central[-1]
+landing_fuel_optimist = pred_fuel_upper[-1]
+landing_fuel_pessimst = pred_fuel_lower[-1]
+
+# Overall prediction verdict
+if landing_fuel_pessimst < fuel_crit:
+    verdict = "🔴 CRITICAL RISK — Even optimistic scenario may not meet reserve"
+    verdict_clr = "#ff2244"
+elif landing_fuel_central < fuel_warn:
+    verdict = "🟡 WARNING — Central forecast below safe landing reserve"
+    verdict_clr = "#ffaa00"
+elif landing_fuel_pessimst < fuel_reserve:
+    verdict = "🟠 CAUTION — Pessimistic scenario misses reserve target"
+    verdict_clr = "#ff8c00"
+else:
+    verdict = "🟢 NOMINAL — Fuel sufficient for safe landing with reserve"
+    verdict_clr = "#39ff14"
+
+
+#  KPI ROW — PREDICTION SUMMARY
+
+pk1, pk2, pk3, pk4, pk5, pk6 = st.columns(6)
+pk1.metric("Avg Burn Rate",    f"{avg_burn:.2f}%/min",
+           delta=f"±{std_burn:.2f} variability", delta_color="off")
+pk2.metric("Predicted Landing Fuel", f"{landing_fuel_central:.1f}%",
+           delta="CRITICAL" if landing_fuel_central < fuel_crit
+           else "LOW" if landing_fuel_central < fuel_warn else "Safe",
+           delta_color="inverse" if landing_fuel_central < fuel_warn else "off")
+pk3.metric("Optimistic Landing",  f"{landing_fuel_optimist:.1f}%")
+pk4.metric("Pessimistic Landing", f"{landing_fuel_pessimst:.1f}%",
+           delta="⚠ Below reserve!" if landing_fuel_pessimst < fuel_reserve else "✅ Above reserve",
+           delta_color="inverse" if landing_fuel_pessimst < fuel_reserve else "off")
+pk5.metric("ETA to WARNING",
+           f"T+{tte_warn:02d}m" if tte_warn else "Not reached",
+           delta="Already breached" if fuel[PREDICT_FROM] <= fuel_warn else "",
+           delta_color="inverse")
+pk6.metric("ETA to CRITICAL",
+           f"T+{tte_crit:02d}m" if tte_crit else "Not reached",
+           delta="Already breached" if fuel[PREDICT_FROM] <= fuel_crit else "",
+           delta_color="inverse")
+
+# Verdict banner
+st.markdown(
+    f'<div style="background:#0a0010;border:2px solid {verdict_clr};border-radius:8px;'
+    f'padding:12px 20px;margin:12px 0;font-family:monospace;font-size:14px;'
+    f'color:{verdict_clr};font-weight:bold;letter-spacing:1px">'
+    f'🤖 PREDICTION VERDICT &nbsp;|&nbsp; {verdict}'
+    f'</div>', unsafe_allow_html=True)
+
+#  PREDICTION CHART
+
+st.markdown("#### 📈 Fuel Level — Actual vs Predicted Forecast")
+
+fig_pred = go.Figure()
+
+# ── Phase bands ───────────────────────────────────────────────
+phase_changes = [0]
+for i in range(1, DURATION):
+    if PHASES[i] != PHASES[i-1]: phase_changes.append(i)
+phase_changes.append(DURATION)
+PHASE_CLR_LOCAL = {
+    "Takeoff":  "rgba(255,215,0,0.10)", "Climb":   "rgba(0,191,255,0.08)",
+    "Cruise":   "rgba(57,255,20,0.08)", "Descent": "rgba(255,140,0,0.08)",
+    "Approach": "rgba(255,107,53,0.08)",
+}
+for j in range(len(phase_changes)-1):
+    s, e = phase_changes[j], phase_changes[j+1]
+    fig_pred.add_vrect(x0=LABELS[s], x1=LABELS[e-1],
+                       fillcolor=PHASE_CLR_LOCAL[PHASES[s]], layer="below", line_width=0)
+
+# ── Threshold lines ───────────────────────────────────────────
+fig_pred.add_hline(y=fuel_warn, line_dash="dash", line_color="#ffaa00", line_width=1.5,
+    annotation_text=f"⚠ WARN ≤{fuel_warn}%", annotation_font_color="#ffaa00",
+    annotation_position="top left")
+fig_pred.add_hline(y=fuel_crit, line_dash="dash", line_color="#ff2244", line_width=1.5,
+    annotation_text=f"🔴 CRIT ≤{fuel_crit}%", annotation_font_color="#ff2244",
+    annotation_position="top left")
+fig_pred.add_hline(y=fuel_reserve, line_dash="dot", line_color="#a78bfa", line_width=1.5,
+    annotation_text=f"🛬 Reserve {fuel_reserve}%", annotation_font_color="#a78bfa",
+    annotation_position="bottom left")
+
+# ── Prediction split divider ──────────────────────────────────
+fig_pred.add_vline(x=PREDICT_FROM, line_dash="dot", line_color="#a78bfa",
+                   line_width=2,
+                   annotation_text="◀ Actual  |  Predicted ▶",
+                   annotation_font_color="#a78bfa",
+                   annotation_position="top right")
+
+# ── Actual fuel line ──────────────────────────────────────────
+fig_pred.add_trace(go.Scatter(
+    x=LABELS[:PREDICT_FROM+1], y=list(fuel[:PREDICT_FROM+1]),
+    mode="lines+markers",
+    line=dict(color="#39ff14", width=3),
+    marker=dict(color="#39ff14", size=6, line=dict(color="#000d1a", width=1)),
+    name="Actual Fuel",
+    hovertemplate="<b>%{x}</b><br>Actual: %{y:.1f}%<extra></extra>",
+))
+
+# ── Prediction confidence band (shaded) ───────────────────────
+fig_pred.add_trace(go.Scatter(
+    x=pred_labels + pred_labels[::-1],
+    y=pred_fuel_upper + pred_fuel_lower[::-1],
+    fill="toself",
+    fillcolor="rgba(167,139,250,0.15)",
+    line=dict(color="rgba(0,0,0,0)"),
+    showlegend=True,
+    name=f"Confidence Band ({pred_confidence})",
+    hoverinfo="skip",
+))
+
+# ── Pessimistic line ──────────────────────────────────────────
+fig_pred.add_trace(go.Scatter(
+    x=pred_labels, y=pred_fuel_lower,
+    mode="lines",
+    line=dict(color="#ff8c00", width=1.5, dash="dot"),
+    name="Pessimistic",
+    hovertemplate="<b>%{x}</b><br>Pessimistic: %{y:.1f}%<extra></extra>",
+))
+
+# ── Optimistic line ───────────────────────────────────────────
+fig_pred.add_trace(go.Scatter(
+    x=pred_labels, y=pred_fuel_upper,
+    mode="lines",
+    line=dict(color="#00d4ff", width=1.5, dash="dot"),
+    name="Optimistic",
+    hovertemplate="<b>%{x}</b><br>Optimistic: %{y:.1f}%<extra></extra>",
+))
+
+# ── Central prediction line ───────────────────────────────────
+fig_pred.add_trace(go.Scatter(
+    x=pred_labels, y=pred_fuel_central,
+    mode="lines+markers",
+    line=dict(color="#a78bfa", width=3, dash="dash"),
+    marker=dict(color="#a78bfa", size=7,
+                symbol=["circle"] * (len(pred_labels)-1) + ["diamond"],
+                line=dict(color="#fff", width=1)),
+    name="Predicted (Central)",
+    hovertemplate="<b>%{x}</b><br>Predicted: %{y:.1f}%<extra></extra>",
+))
+
+# ── Landing target marker ─────────────────────────────────────
+fig_pred.add_trace(go.Scatter(
+    x=[LABELS[-1]], y=[landing_fuel_central],
+    mode="markers+text",
+    marker=dict(color="#a78bfa", size=16, symbol="star",
+                line=dict(color="#fff", width=2)),
+    text=[f"🛬 {landing_fuel_central:.1f}%"],
+    textposition="top right",
+    textfont=dict(color="#a78bfa", size=11, family="monospace"),
+    showlegend=False,
+    hovertemplate=f"<b>Predicted Landing</b><br>Fuel: {landing_fuel_central:.1f}%<extra></extra>",
+))
+
+# ── ETA markers (if warning/critical crossed) ─────────────────
+for tte, label, clr in [(tte_warn, f"WARN@T+{tte_warn:02d}m", "#ffaa00"),
+                         (tte_crit, f"CRIT@T+{tte_crit:02d}m", "#ff2244")]:
+    if tte:
+        fig_pred.add_vline(x=tte, line_color=clr, line_width=1, line_dash="dash",
+                           annotation_text=label, annotation_font_color=clr,
+                           annotation_position="bottom right")
+
+fig_pred.update_layout(
+    plot_bgcolor="#050f1e", paper_bgcolor="#000d1a",
+    font=dict(family="monospace", color="#c8d8e8"),
+    xaxis=dict(title="Flight Time", gridcolor="#0d2035",
+               tickfont=dict(size=10), tickangle=-30,
+               tickmode="array", tickvals=LABELS, ticktext=LABELS),
+    yaxis=dict(title="Fuel Level (%)", gridcolor="#0d2035", range=[0, 105]),
+    height=420, showlegend=True,
+    legend=dict(orientation="h", yanchor="bottom", y=1.01,
+                xanchor="left", x=0, font=dict(size=10),
+                bgcolor="rgba(5,15,30,0.8)", bordercolor="#1a3045"),
+    margin=dict(l=60, r=40, t=40, b=50),
+    hovermode="x unified",
+)
+st.plotly_chart(fig_pred, use_container_width=True)
+
+#  BURN RATE TREND CHART
+
+st.markdown("#### 📊 Burn Rate Trend — Per Minute Consumption")
+
+fig_burn = go.Figure()
+
+burn_labels = LABELS[1:]  # T+01m to T+29m
+burn_colors = ["#a78bfa" if i >= DURATION-1-lookback
+               else "rgba(57,255,20,0.4)" for i in range(len(burn_rates))]
+
+# Bar chart of burn rate
+fig_burn.add_trace(go.Bar(
+    x=burn_labels, y=burn_rates,
+    marker_color=burn_colors,
+    marker_line_color="#000d1a", marker_line_width=0.8,
+    name="Burn Rate (%/min)",
+    hovertemplate="<b>%{x}</b><br>Burn: %{y:.2f}%/min<extra></extra>",
+))
+
+# Average line
+fig_burn.add_hline(y=avg_burn, line_dash="dash", line_color="#a78bfa", line_width=2,
+    annotation_text=f"📊 Avg {avg_burn:.2f}%/min (last {lookback} pts)",
+    annotation_font_color="#a78bfa", annotation_position="top right")
+
+# Lookback window shade
+fig_burn.add_vrect(
+    x0=LABELS[max(1, DURATION-lookback)], x1=LABELS[-1],
+    fillcolor="rgba(167,139,250,0.08)", line_color="#a78bfa",
+    line_width=1, line_dash="dot",
+    annotation_text=f"Lookback window ({lookback} pts)",
+    annotation_font_color="#a78bfa", annotation_position="top left",
+)
+
+# Phase bands
+for j in range(len(phase_changes)-1):
+    s, e = phase_changes[j], phase_changes[j+1]
+    if s > 0:
+        fig_burn.add_vrect(x0=LABELS[s], x1=LABELS[min(e, DURATION)-1],
+                           fillcolor=PHASE_CLR_LOCAL[PHASES[s]], layer="below", line_width=0)
+
+fig_burn.update_layout(
+    plot_bgcolor="#050f1e", paper_bgcolor="#000d1a",
+    font=dict(family="monospace", color="#c8d8e8"),
+    xaxis=dict(title="Flight Time", gridcolor="#0d2035",
+               tickfont=dict(size=10), tickangle=-30,
+               type="category", categoryorder="array", categoryarray=burn_labels),
+    yaxis=dict(title="Burn Rate (%/min)", gridcolor="#0d2035", range=[0, max(burn_rates)+1]),
+    height=280, showlegend=False,
+    margin=dict(l=60, r=40, t=20, b=50),
+    hovermode="x unified",
+)
+st.plotly_chart(fig_burn, use_container_width=True)
+
+#  PREDICTION SUMMARY TABLE
+st.markdown("#### 📋 Predicted Fuel State — Minute by Minute")
+
+pred_df = pd.DataFrame({
+    "Time":              pred_labels,
+    "Phase":             [PHASES[t] for t in pred_times],
+    "Central (%)":       [round(v, 1) for v in pred_fuel_central],
+    "Optimistic (%)":    [round(v, 1) for v in pred_fuel_upper],
+    "Pessimistic (%)":   [round(v, 1) for v in pred_fuel_lower],
+    "Central Status":    [
+        "CRITICAL" if v <= fuel_crit else "WARNING" if v <= fuel_warn
+        else "RESERVE!" if v <= fuel_reserve else "SAFE"
+        for v in pred_fuel_central
+    ],
+})
+
+SEV_BG_PRED = {
+    "CRITICAL":  "background-color:#2a1000;color:#ff2244;font-weight:bold",
+    "WARNING":   "background-color:#1e1600;color:#ffaa00;font-weight:bold",
+    "RESERVE!":  "background-color:#1a0030;color:#a78bfa;font-weight:bold",
+    "SAFE":      "background-color:#001a0a;color:#39ff14",
+}
+
+def color_pred_val(val):
+    if isinstance(val, (int, float)):
+        if val <= fuel_crit:    return "color:#ff2244;font-weight:bold"
+        if val <= fuel_warn:    return "color:#ffaa00;font-weight:bold"
+        if val <= fuel_reserve: return "color:#a78bfa;font-weight:bold"
+        return "color:#39ff14"
+    return ""
+
+st.dataframe(
+    pred_df.style
+        .applymap(lambda v: SEV_BG_PRED.get(v, ""), subset=["Central Status"])
+        .applymap(color_pred_val, subset=["Central (%)", "Optimistic (%)", "Pessimistic (%)"])
+        .hide(axis="index"),
+    use_container_width=True,
+    height=min(80 + len(pred_df)*38, 460),
+)
+
+#  RECOMMENDATION BOX
+
+st.markdown("#### 🤖 AI Recommendation")
+
+rec_lines = []
+if landing_fuel_pessimst < fuel_crit:
+    rec_lines.append("🔴 **Divert immediately** — pessimistic projection hits CRITICAL before landing.")
+if landing_fuel_central < fuel_warn:
+    rec_lines.append(f"🟡 **Recommend diversion** — central forecast ({landing_fuel_central:.1f}%) below WARNING threshold.")
+if tte_warn and tte_warn < DURATION - 3:
+    rec_lines.append(f"⚠ **Fuel WARNING expected at {LABELS[tte_warn]}** — initiate fuel management procedures.")
+if tte_crit:
+    rec_lines.append(f"🚨 **CRITICAL fuel at {LABELS[tte_crit]}** — declare minimum fuel, expedite landing.")
+if landing_fuel_central < fuel_reserve:
+    rec_lines.append(f"🛬 **Landing reserve at risk** — projected {landing_fuel_central:.1f}% below {fuel_reserve}% minimum reserve.")
+if avg_burn > 3.5:
+    rec_lines.append(f"📊 **High burn rate detected** — {avg_burn:.2f}%/min is above typical cruise consumption.")
+if not rec_lines:
+    rec_lines.append(f"✅ **Fuel management nominal** — projected landing fuel {landing_fuel_central:.1f}% is above all thresholds.")
+    rec_lines.append(f"📊 **Burn rate stable** at {avg_burn:.2f}%/min. No intervention required.")
+
+for line in rec_lines:
+    clr = "#ff2244" if "🔴" in line else "#ffaa00" if ("🟡" in line or "⚠" in line) else \
+          "#ff0033" if "🚨" in line else "#a78bfa" if "🛬" in line else "#39ff14"
+    st.markdown(
+        f'<div style="background:#050f1e;border-left:4px solid {clr};border-radius:4px;'
+        f'padding:10px 16px;margin:5px 0;font-family:monospace;font-size:13px;color:{clr}">'
+        f'{line}</div>', unsafe_allow_html=True)
+
+st.divider()
+st.caption("✈ Aircraft FDM System | Conditions 1–4 + Predictive Fuel Estimation | FLT-BU01")
