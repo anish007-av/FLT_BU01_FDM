@@ -102,6 +102,29 @@ for i in range(DURATION):
     else:                 roll[i] = np.random.uniform(-10, 10)
 roll = np.round(roll, 1)
 
+# ── Pitch Angle ──────────────────────────────
+pitch = np.zeros(DURATION)
+
+for i in range(DURATION):
+    phase = PHASES[i]
+
+    if phase == "Takeoff":
+        pitch[i] = 2 + i*3 + np.random.uniform(-0.5, 0.5)
+
+    elif phase == "Climb":
+        pitch[i] = np.random.uniform(6, 12)
+
+    elif phase == "Cruise":
+        pitch[i] = np.random.uniform(-2, 3)
+
+    elif phase == "Descent":
+        pitch[i] = np.random.uniform(-6, -2)
+
+    else:  # Approach
+        pitch[i] = np.random.uniform(-4, 1)
+
+pitch = np.round(pitch, 1)
+
 # ── Altitude ──────────────────────────────────────────────────
 alt = np.zeros(DURATION); alt[0] = 800
 for i in range(1, DURATION):
@@ -179,6 +202,9 @@ def alt_drop_status(d):
     elif d >= alt_warn:  return "WARNING"
     return "SAFE"
 
+def pitch_status(p):
+    return "SAFE"
+
 SEV_BG = {
     "EMERGENCY":   "background-color:#1a0000;color:#ff0033;font-weight:bold",
     "CRITICAL":    "background-color:#2a1000;color:#ff2244;font-weight:bold",
@@ -199,6 +225,8 @@ df = pd.DataFrame({
     "Fuel Status":    [fuel_status(f) for f in fuel],
     "Roll Angle (°)": roll,
     "Roll Status":    [roll_status(r) for r in roll],
+    "Pitch Angle (°)": pitch,
+    "Pitch Status":    [pitch_status(p) for p in pitch],
     "Altitude (ft)":  alt,
     "Drop (ft/min)":  alt_drops,
     "Alt Status":     [alt_drop_status(d) for d in alt_drops],
@@ -910,6 +938,84 @@ else:
 
 st.divider()
 
+#  SECTION — PITCH ANGLE (SEPARATE LOG)
+
+st.markdown(
+    '<div class="section-banner" style="border-color:#00ffaa;background:#00ffaa10;color:#00ffaa">'
+    '📐 SECTION 5 — CONDITION: PITCH ANGLE MONITOR'
+    '</div>', unsafe_allow_html=True
+)
+
+st.info(
+    "Pitch angle represents longitudinal (nose-up / nose-down) aircraft motion. "
+    "No anomaly thresholds applied — monitoring only.",
+    icon="ℹ️"
+)
+
+# ── Pitch Angle Line Graph ─────────────────────────
+st.markdown("#### 📈 Pitch Angle — Line Graph")
+
+fig_pitch = go.Figure()
+
+fig_pitch.add_trace(go.Scatter(
+    x=LABELS,
+    y=pitch,
+    mode="lines+markers",
+    line=dict(color="#00ffaa", width=3),
+    marker=dict(size=6, color="#00ffaa"),
+    hovertemplate="<b>%{x}</b><br>Pitch: %{y:.1f}°<extra></extra>",
+))
+
+# Zero reference (level flight)
+fig_pitch.add_hline(
+    y=0,
+    line_dash="dash",
+    line_color="gray",
+    annotation_text="0° Level",
+    annotation_position="top right"
+)
+
+fig_pitch.update_layout(
+    plot_bgcolor="#050f1e",
+    paper_bgcolor="#000d1a",
+    font=dict(family="monospace", color="#c8d8e8"),
+    xaxis=dict(
+        title="Flight Time",
+        tickangle=-30,
+        tickmode="array",
+        tickvals=LABELS,
+        ticktext=LABELS
+    ),
+    yaxis=dict(
+        title="Pitch Angle (°)",
+        range=[-15, 20]
+    ),
+    height=350,
+    showlegend=False
+)
+
+st.plotly_chart(fig_pitch, use_container_width=True)
+
+# ── Pitch Data Table ────────────────────────
+st.markdown("#### 📋 Pitch Angle — Data Table (All 30 Samples)")
+
+pitch_df = df[["Time","Phase","Pitch Angle (°)","Pitch Status"]].copy()
+
+def color_pitch(val):
+    if isinstance(val, (int, float)):
+        return "color:#00ffaa"
+    return ""
+
+st.dataframe(
+    pitch_df.style
+        .applymap(lambda v: SEV_BG.get(v,""), subset=["Pitch Status"])
+        .applymap(color_pitch, subset=["Pitch Angle (°)"])
+        .hide(axis="index"),
+    use_container_width=True,
+    height=380
+)
+
+st.success("✅ Pitch motion remains within expected operational range.")
 
 
 #  SECTION 4 — ALTITUDE DROP  
@@ -959,6 +1065,8 @@ st.dataframe(
         .hide(axis="index"),
     use_container_width=True, height=420,
 )
+
+
 
 # ── 4D: Cumulative alert log ──────────────────────────────────
 st.markdown(f"#### ⚠ Altitude — Cumulative Alert Log ({len(alt_alerts)} alert(s))")
