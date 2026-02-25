@@ -1031,17 +1031,17 @@ pred_times  = list(range(PREDICT_FROM, DURATION))
 pred_labels = [f"T+{t:02d}m" for t in pred_times]
 
 # Central prediction
-pred_fuel_central = [fuel[PREDICT_FROM]]
+pred_fuel_central = [fuel[-1]]  #start from last known fuel level
 for _ in range(1, remaining):
     pred_fuel_central.append(max(0, pred_fuel_central[-1] - avg_burn))
 
 # Optimistic band (lower burn rate)
-pred_fuel_upper = [fuel[PREDICT_FROM]]
+pred_fuel_upper = [fuel[-1]]
 for _ in range(1, remaining):
     pred_fuel_upper.append(max(0, pred_fuel_upper[-1] - max(0, avg_burn - band_width)))
 
 # Pessimistic band (higher burn rate)
-pred_fuel_lower = [fuel[PREDICT_FROM]]
+pred_fuel_lower = [fuel[-1]]
 for _ in range(1, remaining):
     pred_fuel_lower.append(max(0, pred_fuel_lower[-1] - (avg_burn + band_width)))
 
